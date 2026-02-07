@@ -76,11 +76,11 @@ A powerful, self-hosted payment tracking application with a beautiful dark mode 
 ## 🚀 Quick Start
 
 ### Option 1: Direct Use
-1. Open `payment-tracker-v2.1.html` in your web browser
+1. Open `payment-tracker-v2_1_1.html` in your web browser
 2. Start adding payments!
 
 ### Option 2: Self-Hosted Setup
-1. Upload `payment-tracker-v2.1.html`, `manifest.json`, and `sw.js` to your web server
+1. Upload `payment-tracker-v2_1_1.html`, `manifest.json`, and `sw.js` to your web server
 2. Ensure HTTPS is enabled (required for PWA features)
 3. Access via your domain
 
@@ -113,27 +113,28 @@ A powerful, self-hosted payment tracking application with a beautiful dark mode 
 ## 📁 File Structure
 
 ```
-├── payment-tracker-v2.1.html    # Main application file (CURRENT VERSION) ⭐
-├── payment-tracker-v2.0.html    # Previous version
-├── manifest.json                 # PWA manifest
-├── sw.js                         # Service worker for offline support
-├── vercel.json                   # Vercel deployment configuration
-└── README.md                     # This file
+├── payment-tracker-v2_1_1.html  # Main application file (CURRENT VERSION) ⭐
+├── payment-tracker-v2.1.html   # Previous version
+├── payment-tracker-v2.0.html   # Previous version
+├── manifest.json                # PWA manifest
+├── sw.js                        # Service worker for offline support
+├── vercel.json                  # Vercel deployment configuration
+└── README.md                    # This file
 ```
 
 ### Main Application File
 
-**`payment-tracker-v2.1.html`** - This is the current, production-ready version of Payment Tracker Pro. It's a single HTML file containing all the code, styles, and functionality. Simply open it in your browser to use it. No build process or installation required!
+**`payment-tracker-v2_1_1.html`** - This is the current, production-ready version of Payment Tracker Pro with v2.1 features including Onboarding & Profile System, Goal Headline, and Category Breakdown. It's a single HTML file containing all the code, styles, and functionality. Simply open it in your browser to use it. No build process or installation required!
 
 ## 🔄 Migration from Previous Versions
 
 Your existing data is fully compatible! Simply:
 1. Export your data from previous versions (if needed)
-2. Open v2.1
+2. Open v2.1.1
 3. Import your data (if exported)
 4. All your payments, goals, and settings will be preserved
 
-**Note:** v2.1 is fully compatible with v2.0 data - no migration needed!
+**Note:** v2.1.1 is fully compatible with v2.1 and v2.0 data - no migration needed!
 
 ## 🛠️ Technical Details
 
@@ -145,7 +146,26 @@ Your existing data is fully compatible! Simply:
 
 ## 📝 Version History
 
-### v2.1 (Current) - `payment-tracker-v2.1.html` ⭐
+### v2.1.1 (Current) - `payment-tracker-v2_1_1.html` ⭐
+
+**Release Date:** February 2026
+
+**What's New:**
+- **Onboarding & Profile System** - First-time user experience with profile setup
+- **Goal Headline & Quick-Pick Chips** - Enhanced goal management interface
+- **Category Breakdown** - Improved category visualization and analytics
+- All features from v2.1 and v2.0
+
+**New Features:**
+- User onboarding flow for first-time setup
+- Profile management (name, currency, goal preferences)
+- Enhanced goal headline banner
+- Quick-pick goal chips for faster goal creation
+- Improved category breakdown visualization
+
+---
+
+### v2.1 - `payment-tracker-v2.1.html`
 
 **Release Date:** February 2026
 
@@ -279,7 +299,7 @@ The following files are available in the repository for reference but are not th
 - `payment-tracker-v1.2.html` - Version 1.2 with enhanced dashboard
 - Various backup and test files (excluded from git via .gitignore)
 
-**Note:** Always use `payment-tracker-v2.1.html` for the latest features and improvements!
+**Note:** Always use `payment-tracker-v2_1_1.html` for the latest features and improvements!
 
 ## 🤝 Contributing
 

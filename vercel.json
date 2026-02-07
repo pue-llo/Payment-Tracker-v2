@@ -3,11 +3,11 @@
   "rewrites": [
     {
       "source": "/",
-      "destination": "/payment-tracker-v2.1.html"
+      "destination": "/payment-tracker-v2_1_1.html"
     },
     {
       "source": "/(.*)",
-      "destination": "/payment-tracker-v2.1.html"
+      "destination": "/payment-tracker-v2_1_1.html"
     }
   ],
   "headers": [
