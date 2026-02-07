@@ -39,3 +39,29 @@ node_modules/
 # Build outputs (if using build process)
 dist/
 build/
+
+# Other applications (not Payment Tracker)
+index.html
+inventory-tracker*.html
+inventory-tracker*.jsx
+payment-reminder-dashboard.jsx
+assets/
+
+# Payment Tracker old versions and test files
+payment-tracker-clean.html
+payment-tracker-enhanced.html
+payment-tracker-final.html
+payment-tracker-pro.html
+payment-tracker-simple.html
+payment-tracker-test-backup.html
+payment-tracker-ultimate-backup.html
+payment-tracker-ultimate.html
+payment-tracker-v1.1-backup.html
+payment-tracker-v1.1-test.html
+payment-tracker-v1.1.html
+payment-tracker-v1.2.html
+
+# Test and diagnostic files
+diagnostic-tool.html
+goal-card-layouts.html
+test*.html
