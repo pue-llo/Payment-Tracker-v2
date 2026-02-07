@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Tracker Diagnostic Tool</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        h1 { color: #4a9eff; }
+        .section {
+            background: #2a2a2a;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 1px solid #444;
+        }
+        button {
+            background: #4a9eff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover { background: #357abd; }
+        button.danger {
+            background: #d32f2f;
+        }
+        button.danger:hover { background: #a01f1f; }
+        pre {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            border: 1px solid #444;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 6px;
+        }
+        .status.good { background: #1b5e20; border: 1px solid #4caf50; }
+        .status.bad { background: #b71c1c; border: 1px solid #f44336; }
+        .status.warning { background: #e65100; border: 1px solid #ff9800; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Payment Tracker Diagnostic Tool</h1>
+    <p>This tool helps identify why your dashboard shows $0.00</p>
+
+    <div class="section">
+        <h2>1. Data Status</h2>
+        <div id="dataStatus"></div>
+        <button onclick="checkData()">🔍 Check Data</button>
+        <button onclick="showRawData()">📄 Show Raw Data</button>
+    </div>
+
+    <div class="section">
+        <h2>2. Date Format Check</h2>
+        <div id="dateStatus"></div>
+        <button onclick="checkDates()">📅 Check Dates</button>
+        <button onclick="fixDates()">🔧 Fix Date Formats</button>
+    </div>
+
+    <div class="section">
+        <h2>3. Payment Type Check</h2>
+        <div id="typeStatus"></div>
+        <button onclick="checkTypes()">🏷️ Check Types</button>
+    </div>
+
+    <div class="section">
+        <h2>4. Current Month Calculation</h2>
+        <div id="monthStatus"></div>
+        <button onclick="checkMonth()">📊 Check Current Month</button>
+    </div>
+
+    <div class="section">
+        <h2>5. Raw Data</h2>
+        <pre id="rawData">Click "Show Raw Data" above</pre>
+    </div>
+
+    <div class="section">
+        <h2>6. Fix All Issues</h2>
+        <button onclick="fixAll()" style="font-size: 18px; padding: 15px 30px;">🔧 Fix All Data Issues</button>
+        <button onclick="clearData()" class="danger">🗑️ Clear All Data (Reset)</button>
+    </div>
+
+    <script>
+        let data = null;
+
+        function loadData() {
+            const saved = localStorage.getItem('paymentTrackerData');
+            if (saved) {
+                try {
+                    data = JSON.parse(saved);
+                    return true;
+                } catch (e) {
+                    console.error('Error parsing data:', e);
+                    return false;
+                }
+            }
+            return false;
+        }
+
+        function checkData() {
+            const statusDiv = document.getElementById('dataStatus');
+            if (loadData()) {
+                const paymentCount = data.payments ? data.payments.length : 0;
+                if (paymentCount > 0) {
+                    statusDiv.innerHTML = `<div class="status good">✅ Found ${paymentCount} payments in localStorage</div>`;
+                } else {
+                    statusDiv.innerHTML = `<div class="status bad">❌ No payments found - data array is empty</div>`;
+                }
+            } else {
+                statusDiv.innerHTML = `<div class="status bad">❌ No data found in localStorage or data is corrupted</div>`;
+            }
+        }
+
+        function showRawData() {
+            if (loadData()) {
+                document.getElementById('rawData').textContent = JSON.stringify(data, null, 2);
+            } else {
+                document.getElementById('rawData').textContent = 'No data found';
+            }
+        }
+
+        function checkDates() {
+            const statusDiv = document.getElementById('dateStatus');
+            if (!loadData() || !data.payments) {
+                statusDiv.innerHTML = `<div class="status bad">❌ No data to check</div>`;
+                return;
+            }
+
+            const issues = [];
+            const validFormat = /^\d{4}-\d{2}-\d{2}$/;
+
+            data.payments.forEach((p, i) => {
+                if (!p.dueDate) {
+                    issues.push(`Payment ${i}: Missing dueDate`);
+                } else if (!validFormat.test(p.dueDate)) {
+                    issues.push(`Payment ${i}: Invalid format "${p.dueDate}" (should be YYYY-MM-DD)`);
+                }
+            });
+
+            if (issues.length === 0) {
+                statusDiv.innerHTML = `<div class="status good">✅ All ${data.payments.length} payments have correct date format (YYYY-MM-DD)</div>`;
+            } else {
+                statusDiv.innerHTML = `<div class="status bad">❌ Found ${issues.length} date format issues:<br>${issues.join('<br>')}</div>`;
+            }
+        }
+
+        function fixDates() {
+            if (!loadData() || !data.payments) {
+                alert('No data to fix');
+                return;
+            }
+
+            let fixed = 0;
+            data.payments.forEach(p => {
+                if (p.dueDate && !p.dueDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                    const parsedDate = new Date(p.dueDate);
+                    if (!isNaN(parsedDate)) {
+                        p.dueDate = parsedDate.toISOString().split('T')[0];
+                        fixed++;
+                    }
+                }
+            });
+
+            localStorage.setItem('paymentTrackerData', JSON.stringify(data));
+            alert(`Fixed ${fixed} date formats. Reload the payment tracker to see changes.`);
+            checkDates();
+        }
+
+        function checkTypes() {
+            const statusDiv = document.getElementById('typeStatus');
+            if (!loadData() || !data.payments) {
+                statusDiv.innerHTML = `<div class="status bad">❌ No data to check</div>`;
+                return;
+            }
+
+            const typeCounts = {};
+            data.payments.forEach(p => {
+                const type = p.type || 'undefined';
+                typeCounts[type] = (typeCounts[type] || 0) + 1;
+            });
+
+            let html = '<div class="status good">Payment types found:<br>';
+            Object.entries(typeCounts).forEach(([type, count]) => {
+                const isValid = type === 'i-owe' || type === 'owed-to-me';
+                const icon = isValid ? '✅' : '⚠️';
+                html += `${icon} "${type}": ${count} payments<br>`;
+            });
+            html += '</div>';
+
+            statusDiv.innerHTML = html;
+        }
+
+        function checkMonth() {
+            const statusDiv = document.getElementById('monthStatus');
+            if (!loadData() || !data.payments) {
+                statusDiv.innerHTML = `<div class="status bad">❌ No data to check</div>`;
+                return;
+            }
+
+            const today = new Date();
+            const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+
+            let thisMonthCount = 0;
+            let thisMonthTotal = 0;
+
+            data.payments.forEach(p => {
+                if (p.type === 'i-owe' && p.dueDate && p.dueDate.startsWith(currentMonth)) {
+                    thisMonthCount++;
+                    const amount = parseFloat(p.amount) || 0;
+                    thisMonthTotal += amount;
+                }
+            });
+
+            if (thisMonthCount > 0) {
+                statusDiv.innerHTML = `
+                    <div class="status good">
+                        ✅ Current month: ${currentMonth}<br>
+                        ✅ Found ${thisMonthCount} payments<br>
+                        ✅ Total: $${thisMonthTotal.toFixed(2)}
+                    </div>
+                `;
+            } else {
+                statusDiv.innerHTML = `
+                    <div class="status warning">
+                        ⚠️ Current month: ${currentMonth}<br>
+                        ⚠️ No payments found for current month<br>
+                        ℹ️ Your payments might be in a different month
+                    </div>
+                `;
+            }
+        }
+
+        function fixAll() {
+            if (!loadData() || !data.payments) {
+                alert('No data to fix');
+                return;
+            }
+
+            let fixes = [];
+
+            // Fix dates
+            data.payments.forEach(p => {
+                if (p.dueDate && !p.dueDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                    const parsedDate = new Date(p.dueDate);
+                    if (!isNaN(parsedDate)) {
+                        p.dueDate = parsedDate.toISOString().split('T')[0];
+                        fixes.push('Fixed date format');
+                    }
+                }
+
+                // Ensure required properties
+                if (p.isFlagged === undefined) p.isFlagged = false;
+                if (p.isRecurring === undefined) p.isRecurring = false;
+                if (!p.status) p.status = 'pending';
+            });
+
+            localStorage.setItem('paymentTrackerData', JSON.stringify(data));
+            alert(`Applied ${fixes.length} fixes. Reload the payment tracker now!`);
+
+            // Re-run all checks
+            checkData();
+            checkDates();
+            checkTypes();
+            checkMonth();
+        }
+
+        function clearData() {
+            if (confirm('⚠️ WARNING: This will delete ALL your payment data! Are you sure?')) {
+                if (confirm('This cannot be undone! Really delete everything?')) {
+                    localStorage.removeItem('paymentTrackerData');
+                    alert('All data cleared. Reload the payment tracker to start fresh.');
+                    location.reload();
+                }
+            }
+        }
+
+        // Auto-run on load
+        window.addEventListener('load', () => {
+            checkData();
+            checkDates();
+            checkTypes();
+            checkMonth();
+        });
+    </script>
+</body>
+</html>

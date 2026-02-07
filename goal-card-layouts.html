@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goal Card Layout Options</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: white;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 0.5rem;
+            font-size: 2rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 3rem;
+        }
+
+        .option-label {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #a78bfa;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .option-label span {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        .card-container {
+            margin-bottom: 4rem;
+        }
+
+        /* Shared styles */
+        .category-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.85rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .category-badge.life {
+            background: rgba(168, 85, 247, 0.2);
+            color: #c084fc;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+        }
+
+        .progress-bar {
+            height: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 6px;
+            background: linear-gradient(90deg, #a855f7, #c084fc);
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.5);
+        }
+
+        .btn {
+            padding: 0.7rem 1.25rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        /* ============ OPTION A: Floating Image Above ============ */
+        .option-a {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 100%);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            max-width: 800px;
+        }
+
+        .option-a .image-section {
+            padding: 1.5rem 1.5rem 0;
+        }
+
+        .option-a .floating-image {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .option-a .content-section {
+            padding: 1.5rem 2rem 2rem;
+        }
+
+        .option-a .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+
+        .option-a .goal-name {
+            font-size: 1.75rem;
+            font-weight: 800;
+        }
+
+        .option-a .goal-percent {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #c084fc;
+        }
+
+        .option-a .goal-description {
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 1.25rem;
+            line-height: 1.5;
+        }
+
+        .option-a .progress-section {
+            margin-bottom: 1.25rem;
+        }
+
+        .option-a .amounts {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .option-a .current-amount {
+            color: #4ade80;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .option-a .target-amount {
+            color: rgba(255,255,255,0.5);
+        }
+
+        .option-a .actions {
+            display: flex;
+            gap: 0.6rem;
+        }
+
+        /* ============ OPTION B: Side by Side ============ */
+        .option-b {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 100%);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            overflow: hidden;
+            max-width: 900px;
+        }
+
+        .option-b .image-side {
+            width: 45%;
+            padding: 1.5rem;
+        }
+
+        .option-b .floating-image {
+            width: 100%;
+            height: 100%;
+            min-height: 300px;
+            object-fit: cover;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .option-b .content-side {
+            flex: 1;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .option-b .goal-name {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .option-b .goal-description {
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .option-b .stats-row {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .option-b .stat {
+            text-align: center;
+        }
+
+        .option-b .stat-value {
+            font-size: 1.75rem;
+            font-weight: 800;
+        }
+
+        .option-b .stat-value.green { color: #4ade80; }
+        .option-b .stat-value.purple { color: #c084fc; }
+
+        .option-b .stat-label {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.5);
+            text-transform: uppercase;
+        }
+
+        .option-b .progress-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .option-b .actions {
+            display: flex;
+            gap: 0.6rem;
+        }
+
+        /* ============ OPTION C: Card with Polaroid Image ============ */
+        .option-c {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 100%);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            display: flex;
+            gap: 2rem;
+            align-items: flex-start;
+            max-width: 900px;
+        }
+
+        .option-c .polaroid {
+            background: white;
+            padding: 0.75rem;
+            padding-bottom: 2.5rem;
+            border-radius: 4px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            transform: rotate(-3deg);
+            flex-shrink: 0;
+        }
+
+        .option-c .polaroid img {
+            width: 220px;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 2px;
+        }
+
+        .option-c .polaroid-label {
+            position: absolute;
+            bottom: 0.5rem;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: #333;
+            font-family: 'Comic Sans MS', cursive;
+            font-size: 0.9rem;
+        }
+
+        .option-c .content-side {
+            flex: 1;
+        }
+
+        .option-c .badge-row {
+            margin-bottom: 0.75rem;
+        }
+
+        .option-c .goal-name {
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .option-c .goal-description {
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .option-c .progress-section {
+            margin-bottom: 0.75rem;
+        }
+
+        .option-c .progress-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .option-c .progress-bar {
+            flex: 1;
+        }
+
+        .option-c .percent {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #c084fc;
+        }
+
+        .option-c .amounts {
+            display: flex;
+            gap: 0.5rem;
+            align-items: baseline;
+            margin-bottom: 1.5rem;
+        }
+
+        .option-c .current-amount {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #4ade80;
+        }
+
+        .option-c .target-amount {
+            color: rgba(255,255,255,0.5);
+        }
+
+        .option-c .actions {
+            display: flex;
+            gap: 0.6rem;
+        }
+
+        /* ============ OPTION D: Minimal with Large Image ============ */
+        .option-d {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 100%);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            max-width: 500px;
+        }
+
+        .option-d .image-container {
+            position: relative;
+            padding: 1rem;
+        }
+
+        .option-d .floating-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 16px;
+        }
+
+        .option-d .category-badge {
+            position: absolute;
+            top: 1.75rem;
+            left: 1.75rem;
+        }
+
+        .option-d .content-section {
+            padding: 1rem 1.5rem 1.5rem;
+        }
+
+        .option-d .goal-name {
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .option-d .progress-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .option-d .progress-bar {
+            flex: 1;
+        }
+
+        .option-d .percent {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #c084fc;
+        }
+
+        .option-d .amounts {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+
+        .option-d .current-amount {
+            color: #4ade80;
+            font-weight: 600;
+        }
+
+        .option-d .target-amount {
+            color: rgba(255,255,255,0.5);
+        }
+
+        .option-d .actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .option-d .actions .btn {
+            flex: 1;
+            justify-content: center;
+            padding: 0.6rem;
+            font-size: 0.8rem;
+        }
+
+        /* Vote section */
+        .vote-section {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 16px;
+            margin-top: 2rem;
+        }
+
+        .vote-section h2 {
+            margin-bottom: 1rem;
+        }
+
+        .vote-options {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .vote-btn {
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .vote-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <h1>🎯 Goal Card Layout Options</h1>
+    <p class="subtitle">Choose your preferred layout for the Focus Goal spotlight</p>
+
+    <!-- Option A -->
+    <div class="card-container">
+        <div class="option-label"><span>A</span> Floating Image Above</div>
+        <div class="option-a">
+            <div class="image-section">
+                <img src="https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=800" alt="Rolex" class="floating-image">
+            </div>
+            <div class="content-section">
+                <div class="header-row">
+                    <div>
+                        <div class="category-badge life">🌟 Life Goal</div>
+                    </div>
+                    <div class="goal-percent">13%</div>
+                </div>
+                <div class="goal-name">Rolex Oyster Perpetual Fluted</div>
+                <div class="goal-description">A rolex is a sign of success and an investment piece that I can enjoy and always fall back on.</div>
+                <div class="progress-section">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 13%"></div>
+                    </div>
+                    <div class="amounts">
+                        <span class="current-amount">$2,000</span>
+                        <span class="target-amount">of $15,000</span>
+                    </div>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary">📈 Update Progress</button>
+                    <button class="btn btn-secondary">✏️ Edit</button>
+                    <button class="btn btn-danger">🗑️ Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Option B -->
+    <div class="card-container">
+        <div class="option-label"><span>B</span> Side by Side</div>
+        <div class="option-b">
+            <div class="image-side">
+                <img src="https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=800" alt="Rolex" class="floating-image">
+            </div>
+            <div class="content-side">
+                <div class="category-badge life" style="margin-bottom: 0.75rem;">🌟 Life Goal</div>
+                <div class="goal-name">Rolex Oyster Perpetual Fluted</div>
+                <div class="goal-description">A rolex is a sign of success and an investment piece that I can enjoy and always fall back on.</div>
+                <div class="stats-row">
+                    <div class="stat">
+                        <div class="stat-value green">$2,000</div>
+                        <div class="stat-label">Saved</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value purple">13%</div>
+                        <div class="stat-label">Progress</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">$15,000</div>
+                        <div class="stat-label">Target</div>
+                    </div>
+                </div>
+                <div class="progress-section">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 13%"></div>
+                    </div>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary">📈 Update</button>
+                    <button class="btn btn-secondary">✏️ Edit</button>
+                    <button class="btn btn-danger">🗑️</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Option C -->
+    <div class="card-container">
+        <div class="option-label"><span>C</span> Polaroid Style</div>
+        <div class="option-c">
+            <div class="polaroid" style="position: relative;">
+                <img src="https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=800" alt="Rolex">
+                <div class="polaroid-label">My Dream Watch ✨</div>
+            </div>
+            <div class="content-side">
+                <div class="badge-row">
+                    <div class="category-badge life">🌟 Life Goal</div>
+                </div>
+                <div class="goal-name">Rolex Oyster Perpetual Fluted</div>
+                <div class="goal-description">A rolex is a sign of success and an investment piece that I can enjoy and always fall back on.</div>
+                <div class="progress-section">
+                    <div class="progress-row">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 13%"></div>
+                        </div>
+                        <div class="percent">13%</div>
+                    </div>
+                </div>
+                <div class="amounts">
+                    <span class="current-amount">$2,000</span>
+                    <span class="target-amount">of $15,000</span>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary">📈 Update Progress</button>
+                    <button class="btn btn-secondary">✏️ Edit</button>
+                    <button class="btn btn-danger">🗑️</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Option D -->
+    <div class="card-container">
+        <div class="option-label"><span>D</span> Compact Card (for grid view)</div>
+        <div class="option-d">
+            <div class="image-container">
+                <img src="https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=800" alt="Rolex" class="floating-image">
+                <div class="category-badge life">🌟 Life Goal</div>
+            </div>
+            <div class="content-section">
+                <div class="goal-name">Rolex Oyster Perpetual Fluted</div>
+                <div class="progress-row">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 13%"></div>
+                    </div>
+                    <div class="percent">13%</div>
+                </div>
+                <div class="amounts">
+                    <span class="current-amount">$2,000</span>
+                    <span class="target-amount">of $15,000</span>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary">📈 Update</button>
+                    <button class="btn btn-secondary">✏️</button>
+                    <button class="btn btn-danger">🗑️</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="vote-section">
+        <h2>Which layout do you prefer?</h2>
+        <p style="color: rgba(255,255,255,0.6); margin-bottom: 1.5rem;">Let me know and I'll implement it!</p>
+        <div class="vote-options">
+            <button class="vote-btn">A - Floating Above</button>
+            <button class="vote-btn">B - Side by Side</button>
+            <button class="vote-btn">C - Polaroid</button>
+            <button class="vote-btn">D - Compact</button>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,1573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Tracker</title>
+    <link rel="manifest" href="manifest.json">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-tertiary: #e9ecef;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --border-color: #dee2e6;
+            --primary: #0d6efd;
+            --success: #198754;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --card-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --bg-tertiary: #3a3a3a;
+            --text-primary: #e9ecef;
+            --text-secondary: #adb5bd;
+            --border-color: #495057;
+            --card-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .header {
+            background: var(--bg-primary);
+            padding: 1rem 2rem;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .theme-toggle {
+            background: var(--bg-tertiary);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-primary);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .stat-card h3 {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-card.positive .value { color: var(--success); }
+        .stat-card.negative .value { color: var(--danger); }
+        .stat-card.warning .value { color: var(--warning); }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background: var(--bg-primary);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .chart-card h3 {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .calendar-container {
+            background: var(--bg-primary);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .calendar-header h3 {
+            font-size: 1.25rem;
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .calendar-nav button {
+            background: var(--bg-tertiary);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+        }
+
+        .calendar-day-header {
+            text-align: center;
+            font-weight: 600;
+            padding: 0.75rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            background: var(--bg-secondary);
+        }
+
+        .calendar-day:hover {
+            background: var(--bg-tertiary);
+            transform: scale(1.05);
+        }
+
+        .calendar-day.other-month {
+            opacity: 0.3;
+        }
+
+        .calendar-day.today {
+            border: 2px solid var(--primary);
+            background: var(--primary);
+            color: white;
+        }
+
+        .calendar-day.has-payments {
+            background: var(--success);
+            color: white;
+        }
+
+        .calendar-day.has-overdue {
+            background: var(--danger);
+            color: white;
+        }
+
+        .calendar-day-number {
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .calendar-day-indicator {
+            position: absolute;
+            bottom: 0.25rem;
+            right: 0.25rem;
+            background: white;
+            color: var(--text-primary);
+            border-radius: 50%;
+            width: 1.25rem;
+            height: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .filter-btn {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .bulk-actions {
+            display: none;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            align-items: center;
+        }
+
+        .bulk-actions.active {
+            display: flex;
+        }
+
+        .payments-list {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+        }
+
+        .payment-item {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 1.5rem;
+            align-items: center;
+            transition: background 0.2s;
+        }
+
+        .payment-item:hover {
+            background: var(--bg-secondary);
+        }
+
+        .payment-item:last-child {
+            border-bottom: none;
+        }
+
+        .payment-checkbox {
+            width: 1.25rem;
+            height: 1.25rem;
+            cursor: pointer;
+        }
+
+        .payment-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .payment-description {
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+
+        .payment-meta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .payment-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-business { background: #e7f3ff; color: #0066cc; }
+        .badge-personal { background: #f0e7ff; color: #6600cc; }
+        .badge-owed { background: #e7ffe7; color: #006600; }
+        .badge-owing { background: #ffe7e7; color: #cc0000; }
+        .badge-pending { background: #fff3cd; color: #856404; }
+        .badge-paid { background: #d1e7dd; color: #0f5132; }
+
+        [data-theme="dark"] .badge-business { background: #003366; color: #6eb4ff; }
+        [data-theme="dark"] .badge-personal { background: #330066; color: #b366ff; }
+        [data-theme="dark"] .badge-owed { background: #003300; color: #66ff66; }
+        [data-theme="dark"] .badge-owing { background: #330000; color: #ff6666; }
+
+        .payment-amount {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .payment-amount.positive { color: var(--success); }
+        .payment-amount.negative { color: var(--danger); }
+
+        .payment-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .action-btn.edit {
+            background: var(--primary);
+            color: white;
+        }
+
+        .action-btn.delete {
+            background: var(--danger);
+            color: white;
+        }
+
+        .action-btn.paid {
+            background: var(--success);
+            color: white;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--success);
+            transition: width 0.3s;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-primary);
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+
+        .history-list {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .history-item {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .history-action {
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+
+        .history-time {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .history-details {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+
+            .tabs {
+                padding: 0.5rem 1rem;
+                overflow-x: auto;
+            }
+
+            .tab-content {
+                padding: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .payment-item {
+                grid-template-columns: auto 1fr;
+                gap: 1rem;
+            }
+
+            .payment-actions {
+                grid-column: 2;
+                margin-top: 1rem;
+            }
+
+            .calendar-day {
+                padding: 0.25rem;
+            }
+
+            .calendar-day-number {
+                font-size: 0.75rem;
+            }
+
+            .calendar-day-indicator {
+                width: 1rem;
+                height: 1rem;
+                font-size: 0.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>💰 Payment Tracker</h1>
+        <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('dashboard')">Dashboard</button>
+        <button class="tab-btn" onclick="switchTab('calendar')">Calendar</button>
+        <button class="tab-btn" onclick="switchTab('payments')">Payments</button>
+        <button class="tab-btn" onclick="switchTab('history')">History</button>
+    </div>
+
+    <!-- Dashboard Tab -->
+    <div id="dashboard" class="tab-content active">
+        <div class="stats-grid">
+            <div class="stat-card positive">
+                <h3>Owed to Me</h3>
+                <div class="value" id="owedToMe">$0.00</div>
+            </div>
+            <div class="stat-card negative">
+                <h3>I Owe</h3>
+                <div class="value" id="iOwe">$0.00</div>
+            </div>
+            <div class="stat-card">
+                <h3>Net Balance</h3>
+                <div class="value" id="netBalance">$0.00</div>
+            </div>
+            <div class="stat-card warning">
+                <h3>Overdue</h3>
+                <div class="value" id="overdue">0</div>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3>Balance by Person</h3>
+                <canvas id="byPersonChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>Payment Types</h3>
+                <canvas id="typeChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>Monthly Trend</h3>
+                <canvas id="trendChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>Business vs Personal</h3>
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar Tab -->
+    <div id="calendar" class="tab-content">
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <h3 id="calendarTitle">January 2024</h3>
+                <div class="calendar-nav">
+                    <button onclick="previousMonth()">← Previous</button>
+                    <button onclick="today()">Today</button>
+                    <button onclick="nextMonth()">Next →</button>
+                </div>
+            </div>
+            <div class="calendar-grid" id="calendarGrid">
+                <!-- Calendar will be generated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Payments Tab -->
+    <div id="payments" class="tab-content">
+        <div class="controls">
+            <input type="text" class="search-box" id="searchBox" placeholder="Search payments..." oninput="filterPayments()">
+            <div class="filter-group">
+                <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">All</button>
+                <button class="filter-btn" data-filter="pending" onclick="setFilter('pending')">Pending</button>
+                <button class="filter-btn" data-filter="paid" onclick="setFilter('paid')">Paid</button>
+                <button class="filter-btn" data-filter="overdue" onclick="setFilter('overdue')">Overdue</button>
+            </div>
+            <button class="btn btn-primary" onclick="showAddModal()">+ Add Payment</button>
+        </div>
+
+        <div class="bulk-actions" id="bulkActions">
+            <span id="selectedCount">0 selected</span>
+            <button class="btn btn-success" onclick="bulkMarkPaid()">Mark Paid</button>
+            <button class="btn btn-danger" onclick="bulkDelete()">Delete</button>
+            <button class="btn" onclick="clearSelection()">Clear</button>
+        </div>
+
+        <div class="payments-list" id="paymentsList">
+            <!-- Payments will be listed here -->
+        </div>
+    </div>
+
+    <!-- History Tab -->
+    <div id="history" class="tab-content">
+        <div class="history-list" id="historyList">
+            <!-- History will be listed here -->
+        </div>
+    </div>
+
+    <!-- Add/Edit Payment Modal -->
+    <div class="modal" id="paymentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add Payment</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="paymentForm" onsubmit="savePayment(event)">
+                <div class="form-group">
+                    <label>Description *</label>
+                    <input type="text" id="description" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Person *</label>
+                    <input type="text" id="person" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Amount *</label>
+                    <input type="number" id="amount" step="0.01" min="0" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Due Date *</label>
+                    <input type="date" id="dueDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Category *</label>
+                    <select id="category" onchange="toggleBusinessName()" required>
+                        <option value="Personal">Personal</option>
+                        <option value="Business">Business</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="businessNameGroup" style="display: none;">
+                    <label>Business Name</label>
+                    <input type="text" id="businessName">
+                </div>
+
+                <div class="form-group">
+                    <label>Sub-Category</label>
+                    <input type="text" id="subcategory" placeholder="e.g., Rent, Loan, Services">
+                </div>
+
+                <div class="form-group">
+                    <label>Type *</label>
+                    <select id="type" required>
+                        <option value="owed-to-me">Owed to Me</option>
+                        <option value="i-owe">I Owe</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="isPartialPayment" onchange="togglePartialPayment()">
+                        <label>Enable Partial Payments</label>
+                    </div>
+                </div>
+
+                <div id="partialPaymentFields" style="display: none;">
+                    <div class="form-group">
+                        <label>Total Amount</label>
+                        <input type="number" id="totalAmount" step="0.01" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Amount Paid</label>
+                        <input type="number" id="amountPaid" step="0.01" min="0">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Calendar Day Modal -->
+    <div class="modal" id="dayModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="dayModalTitle">Payments</h2>
+                <button class="close-btn" onclick="closeDayModal()">&times;</button>
+            </div>
+            <div id="dayPaymentsList"></div>
+        </div>
+    </div>
+
+    <script>
+        let data = {
+            payments: [],
+            history: [],
+            theme: 'light'
+        };
+
+        let currentFilter = 'all';
+        let selectedPayments = new Set();
+        let editingPaymentId = null;
+        let charts = {};
+        let currentDate = new Date();
+
+        // Initialize
+        function init() {
+            loadData();
+            applyTheme();
+            renderDashboard();
+            renderPayments();
+            renderHistory();
+            renderCalendar();
+        }
+
+        // Local Storage
+        function loadData() {
+            const saved = localStorage.getItem('paymentTrackerData');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                // Migrate old data structure if needed
+                if (parsed.personal || parsed.business) {
+                    data.payments = [
+                        ...(parsed.personal?.payments || []),
+                        ...(parsed.business?.payments || [])
+                    ];
+                    data.theme = parsed.personal?.theme || 'light';
+                    data.history = [];
+                } else {
+                    data = parsed;
+                }
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('paymentTrackerData', JSON.stringify(data));
+        }
+
+        function addHistory(action, details) {
+            data.history.unshift({
+                id: Date.now(),
+                action: action,
+                details: details,
+                timestamp: new Date().toISOString()
+            });
+            saveData();
+            renderHistory();
+        }
+
+        // Theme
+        function toggleTheme() {
+            data.theme = data.theme === 'light' ? 'dark' : 'light';
+            saveData();
+            applyTheme();
+        }
+
+        function applyTheme() {
+            document.body.setAttribute('data-theme', data.theme);
+            document.querySelector('.theme-toggle').textContent = data.theme === 'light' ? '🌙' : '☀️';
+            renderCharts();
+        }
+
+        // Tabs
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+
+            if (tabName === 'dashboard') renderDashboard();
+            if (tabName === 'calendar') renderCalendar();
+            if (tabName === 'payments') renderPayments();
+            if (tabName === 'history') renderHistory();
+        }
+
+        // Dashboard
+        function renderDashboard() {
+            const payments = data.payments;
+            const today = new Date().toISOString().split('T')[0];
+
+            let owedToMe = 0;
+            let iOwe = 0;
+            let overdueCount = 0;
+
+            payments.forEach(payment => {
+                const amount = payment.isPartialPayment
+                    ? (parseFloat(payment.totalAmount) - parseFloat(payment.amountPaid))
+                    : parseFloat(payment.amount);
+
+                if (payment.status === 'pending') {
+                    if (payment.type === 'owed-to-me') {
+                        owedToMe += amount;
+                    } else {
+                        iOwe += amount;
+                    }
+
+                    if (payment.dueDate < today) {
+                        overdueCount++;
+                    }
+                }
+            });
+
+            const netBalance = owedToMe - iOwe;
+
+            document.getElementById('owedToMe').textContent = `$${owedToMe.toFixed(2)}`;
+            document.getElementById('iOwe').textContent = `$${iOwe.toFixed(2)}`;
+            document.getElementById('netBalance').textContent = `$${netBalance.toFixed(2)}`;
+            document.getElementById('netBalance').style.color = netBalance >= 0 ? 'var(--success)' : 'var(--danger)';
+            document.getElementById('overdue').textContent = overdueCount;
+
+            renderCharts();
+        }
+
+        function renderCharts() {
+            const payments = data.payments;
+
+            // Destroy existing charts
+            Object.values(charts).forEach(chart => chart && chart.destroy());
+
+            // By Person Chart
+            const byPerson = {};
+            payments.forEach(payment => {
+                if (payment.status === 'pending') {
+                    const amount = payment.isPartialPayment
+                        ? (parseFloat(payment.totalAmount) - parseFloat(payment.amountPaid))
+                        : parseFloat(payment.amount);
+                    const multiplier = payment.type === 'owed-to-me' ? 1 : -1;
+                    byPerson[payment.person] = (byPerson[payment.person] || 0) + (amount * multiplier);
+                }
+            });
+
+            charts.byPerson = new Chart(document.getElementById('byPersonChart'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(byPerson),
+                    datasets: [{
+                        label: 'Balance',
+                        data: Object.values(byPerson),
+                        backgroundColor: Object.values(byPerson).map(v => v >= 0 ? '#198754' : '#dc3545')
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+
+            // Type Chart
+            const byType = { 'owed-to-me': 0, 'i-owe': 0 };
+            payments.forEach(payment => {
+                if (payment.status === 'pending') {
+                    const amount = payment.isPartialPayment
+                        ? (parseFloat(payment.totalAmount) - parseFloat(payment.amountPaid))
+                        : parseFloat(payment.amount);
+                    byType[payment.type] += amount;
+                }
+            });
+
+            charts.type = new Chart(document.getElementById('typeChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Owed to Me', 'I Owe'],
+                    datasets: [{
+                        data: [byType['owed-to-me'], byType['i-owe']],
+                        backgroundColor: ['#198754', '#dc3545']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true
+                }
+            });
+
+            // Monthly Trend
+            const byMonth = {};
+            payments.forEach(payment => {
+                const month = payment.dueDate.substring(0, 7);
+                if (!byMonth[month]) byMonth[month] = { owed: 0, owing: 0 };
+                const amount = payment.isPartialPayment
+                    ? (parseFloat(payment.totalAmount) - parseFloat(payment.amountPaid))
+                    : parseFloat(payment.amount);
+                if (payment.type === 'owed-to-me') {
+                    byMonth[month].owed += amount;
+                } else {
+                    byMonth[month].owing += amount;
+                }
+            });
+
+            const months = Object.keys(byMonth).sort();
+            charts.trend = new Chart(document.getElementById('trendChart'), {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [
+                        {
+                            label: 'Owed to Me',
+                            data: months.map(m => byMonth[m].owed),
+                            borderColor: '#198754',
+                            backgroundColor: 'rgba(25, 135, 84, 0.1)'
+                        },
+                        {
+                            label: 'I Owe',
+                            data: months.map(m => byMonth[m].owing),
+                            borderColor: '#dc3545',
+                            backgroundColor: 'rgba(220, 53, 69, 0.1)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true
+                }
+            });
+
+            // Category Chart
+            const byCategory = { Business: 0, Personal: 0 };
+            payments.forEach(payment => {
+                if (payment.status === 'pending') {
+                    const amount = payment.isPartialPayment
+                        ? (parseFloat(payment.totalAmount) - parseFloat(payment.amountPaid))
+                        : parseFloat(payment.amount);
+                    byCategory[payment.category] += amount;
+                }
+            });
+
+            charts.category = new Chart(document.getElementById('categoryChart'), {
+                type: 'pie',
+                data: {
+                    labels: ['Business', 'Personal'],
+                    datasets: [{
+                        data: [byCategory.Business, byCategory.Personal],
+                        backgroundColor: ['#0066cc', '#6600cc']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true
+                }
+            });
+        }
+
+        // Calendar
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                              'July', 'August', 'September', 'October', 'November', 'December'];
+            document.getElementById('calendarTitle').textContent = `${monthNames[month]} ${year}`;
+
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const prevLastDay = new Date(year, month, 0);
+            const startDay = firstDay.getDay();
+            const daysInMonth = lastDay.getDate();
+            const prevDaysInMonth = prevLastDay.getDate();
+
+            let calendarHTML = '';
+            const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            dayHeaders.forEach(day => {
+                calendarHTML += `<div class="calendar-day-header">${day}</div>`;
+            });
+
+            // Previous month days
+            for (let i = startDay - 1; i >= 0; i--) {
+                const day = prevDaysInMonth - i;
+                calendarHTML += `<div class="calendar-day other-month"><div class="calendar-day-number">${day}</div></div>`;
+            }
+
+            // Current month days
+            const today = new Date();
+            const todayStr = today.toISOString().split('T')[0];
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const dayPayments = data.payments.filter(p => p.dueDate === dateStr);
+                const hasOverdue = dayPayments.some(p => p.status === 'pending' && p.dueDate < todayStr);
+                const hasPayments = dayPayments.length > 0;
+
+                let classes = 'calendar-day';
+                if (dateStr === todayStr) classes += ' today';
+                else if (hasOverdue) classes += ' has-overdue';
+                else if (hasPayments) classes += ' has-payments';
+
+                calendarHTML += `
+                    <div class="${classes}" onclick="showDayPayments('${dateStr}')">
+                        <div class="calendar-day-number">${day}</div>
+                        ${dayPayments.length > 0 ? `<div class="calendar-day-indicator">${dayPayments.length}</div>` : ''}
+                    </div>
+                `;
+            }
+
+            // Next month days
+            const remainingDays = 42 - (startDay + daysInMonth);
+            for (let day = 1; day <= remainingDays; day++) {
+                calendarHTML += `<div class="calendar-day other-month"><div class="calendar-day-number">${day}</div></div>`;
+            }
+
+            document.getElementById('calendarGrid').innerHTML = calendarHTML;
+        }
+
+        function previousMonth() {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar();
+        }
+
+        function today() {
+            currentDate = new Date();
+            renderCalendar();
+        }
+
+        function showDayPayments(dateStr) {
+            const dayPayments = data.payments.filter(p => p.dueDate === dateStr);
+            if (dayPayments.length === 0) return;
+
+            const date = new Date(dateStr + 'T00:00:00');
+            document.getElementById('dayModalTitle').textContent = date.toLocaleDateString('en-US', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+            });
+
+            let html = '<div class="payments-list">';
+            dayPayments.forEach(payment => {
+                const amount = payment.isPartialPayment
+                    ? (parseFloat(payment.totalAmount) - parseFloat(payment.amountPaid))
+                    : parseFloat(payment.amount);
+
+                html += `
+                    <div class="payment-item">
+                        <div class="payment-info">
+                            <div class="payment-description">${payment.description}</div>
+                            <div class="payment-meta">
+                                <span>👤 ${payment.person}</span>
+                                <span class="payment-badge badge-${payment.category.toLowerCase()}">${payment.category}</span>
+                                ${payment.businessName ? `<span>🏢 ${payment.businessName}</span>` : ''}
+                                ${payment.subcategory ? `<span>📂 ${payment.subcategory}</span>` : ''}
+                                <span class="payment-badge badge-${payment.status}">${payment.status}</span>
+                            </div>
+                        </div>
+                        <div class="payment-amount ${payment.type === 'owed-to-me' ? 'positive' : 'negative'}">
+                            ${payment.type === 'owed-to-me' ? '+' : '-'}$${amount.toFixed(2)}
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+
+            document.getElementById('dayPaymentsList').innerHTML = html;
+            document.getElementById('dayModal').classList.add('active');
+        }
+
+        function closeDayModal() {
+            document.getElementById('dayModal').classList.remove('active');
+        }
+
+        // Payments
+        function renderPayments() {
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+            const today = new Date().toISOString().split('T')[0];
+
+            let payments = data.payments.filter(payment => {
+                const matchesSearch = !searchTerm ||
+                    payment.description.toLowerCase().includes(searchTerm) ||
+                    payment.person.toLowerCase().includes(searchTerm) ||
+                    payment.category.toLowerCase().includes(searchTerm) ||
+                    (payment.businessName && payment.businessName.toLowerCase().includes(searchTerm)) ||
+                    (payment.subcategory && payment.subcategory.toLowerCase().includes(searchTerm));
+
+                const matchesFilter = currentFilter === 'all' ||
+                    (currentFilter === 'pending' && payment.status === 'pending') ||
+                    (currentFilter === 'paid' && payment.status === 'paid') ||
+                    (currentFilter === 'overdue' && payment.status === 'pending' && payment.dueDate < today);
+
+                return matchesSearch && matchesFilter;
+            });
+
+            payments.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+
+            if (payments.length === 0) {
+                document.getElementById('paymentsList').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <h3>No payments found</h3>
+                        <p>Add a payment to get started</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            payments.forEach(payment => {
+                const isSelected = selectedPayments.has(payment.id);
+                const amount = payment.isPartialPayment
+                    ? (parseFloat(payment.totalAmount) - parseFloat(payment.amountPaid))
+                    : parseFloat(payment.amount);
+
+                html += `
+                    <div class="payment-item">
+                        <input type="checkbox" class="payment-checkbox"
+                               ${isSelected ? 'checked' : ''}
+                               onchange="toggleSelection(${payment.id})">
+                        <div class="payment-info">
+                            <div class="payment-description">${payment.description}</div>
+                            <div class="payment-meta">
+                                <span>👤 ${payment.person}</span>
+                                <span>📅 ${new Date(payment.dueDate + 'T00:00:00').toLocaleDateString()}</span>
+                                <span class="payment-badge badge-${payment.category.toLowerCase()}">${payment.category}</span>
+                                ${payment.businessName ? `<span>🏢 ${payment.businessName}</span>` : ''}
+                                ${payment.subcategory ? `<span>📂 ${payment.subcategory}</span>` : ''}
+                                <span class="payment-badge badge-${payment.type === 'owed-to-me' ? 'owed' : 'owing'}">
+                                    ${payment.type === 'owed-to-me' ? 'Owed to Me' : 'I Owe'}
+                                </span>
+                                <span class="payment-badge badge-${payment.status}">${payment.status}</span>
+                            </div>
+                            ${payment.isPartialPayment ? `
+                                <div class="payment-meta">
+                                    <span>💰 $${parseFloat(payment.amountPaid).toFixed(2)} / $${parseFloat(payment.totalAmount).toFixed(2)}</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${parseFloat(payment.totalAmount) > 0 ? (parseFloat(payment.amountPaid) / parseFloat(payment.totalAmount) * 100) : 0}%"></div>
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div>
+                            <div class="payment-amount ${payment.type === 'owed-to-me' ? 'positive' : 'negative'}">
+                                ${payment.type === 'owed-to-me' ? '+' : '-'}$${amount.toFixed(2)}
+                            </div>
+                            <div class="payment-actions">
+                                ${payment.status === 'pending' ? `
+                                    <button class="action-btn paid" onclick="markAsPaid(${payment.id})">✓ Paid</button>
+                                ` : ''}
+                                <button class="action-btn edit" onclick="editPayment(${payment.id})">✏️</button>
+                                <button class="action-btn delete" onclick="deletePayment(${payment.id})">🗑️</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('paymentsList').innerHTML = html;
+            updateBulkActions();
+        }
+
+        function filterPayments() {
+            renderPayments();
+        }
+
+        function setFilter(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.filter === filter);
+            });
+            renderPayments();
+        }
+
+        // Selection
+        function toggleSelection(id) {
+            if (selectedPayments.has(id)) {
+                selectedPayments.delete(id);
+            } else {
+                selectedPayments.add(id);
+            }
+            updateBulkActions();
+        }
+
+        function updateBulkActions() {
+            const bulkActions = document.getElementById('bulkActions');
+            if (selectedPayments.size > 0) {
+                bulkActions.classList.add('active');
+                document.getElementById('selectedCount').textContent = `${selectedPayments.size} selected`;
+            } else {
+                bulkActions.classList.remove('active');
+            }
+        }
+
+        function clearSelection() {
+            selectedPayments.clear();
+            renderPayments();
+        }
+
+        function bulkMarkPaid() {
+            if (!confirm(`Mark ${selectedPayments.size} payment(s) as paid?`)) return;
+
+            selectedPayments.forEach(id => {
+                const payment = data.payments.find(p => p.id === id);
+                if (payment && payment.status === 'pending') {
+                    payment.status = 'paid';
+                    if (payment.isPartialPayment) {
+                        payment.amountPaid = parseFloat(payment.totalAmount);
+                    }
+                    addHistory('Marked Paid', `${payment.description} - $${payment.amount}`);
+                }
+            });
+
+            selectedPayments.clear();
+            saveData();
+            renderDashboard();
+            renderPayments();
+            renderCalendar();
+        }
+
+        function bulkDelete() {
+            if (!confirm(`Delete ${selectedPayments.size} payment(s)?`)) return;
+
+            selectedPayments.forEach(id => {
+                const payment = data.payments.find(p => p.id === id);
+                if (payment) {
+                    addHistory('Deleted', `${payment.description} - $${payment.amount}`);
+                    data.payments = data.payments.filter(p => p.id !== id);
+                }
+            });
+
+            selectedPayments.clear();
+            saveData();
+            renderDashboard();
+            renderPayments();
+            renderCalendar();
+        }
+
+        // Modal
+        function showAddModal() {
+            editingPaymentId = null;
+            document.getElementById('modalTitle').textContent = 'Add Payment';
+            document.getElementById('paymentForm').reset();
+            document.getElementById('businessNameGroup').style.display = 'none';
+            document.getElementById('partialPaymentFields').style.display = 'none';
+            document.getElementById('paymentModal').classList.add('active');
+        }
+
+        function editPayment(id) {
+            editingPaymentId = id;
+            const payment = data.payments.find(p => p.id === id);
+            if (!payment) return;
+
+            document.getElementById('modalTitle').textContent = 'Edit Payment';
+            document.getElementById('description').value = payment.description;
+            document.getElementById('person').value = payment.person;
+            document.getElementById('amount').value = payment.amount;
+            document.getElementById('dueDate').value = payment.dueDate;
+            document.getElementById('category').value = payment.category;
+            document.getElementById('businessName').value = payment.businessName || '';
+            document.getElementById('subcategory').value = payment.subcategory || '';
+            document.getElementById('type').value = payment.type;
+            document.getElementById('isPartialPayment').checked = payment.isPartialPayment;
+
+            toggleBusinessName();
+            togglePartialPayment();
+
+            if (payment.isPartialPayment) {
+                document.getElementById('totalAmount').value = payment.totalAmount;
+                document.getElementById('amountPaid').value = payment.amountPaid;
+            }
+
+            document.getElementById('paymentModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('paymentModal').classList.remove('active');
+            editingPaymentId = null;
+        }
+
+        function toggleBusinessName() {
+            const category = document.getElementById('category').value;
+            const businessNameGroup = document.getElementById('businessNameGroup');
+            businessNameGroup.style.display = category === 'Business' ? 'block' : 'none';
+        }
+
+        function togglePartialPayment() {
+            const isPartial = document.getElementById('isPartialPayment').checked;
+            document.getElementById('partialPaymentFields').style.display = isPartial ? 'block' : 'none';
+        }
+
+        function savePayment(event) {
+            event.preventDefault();
+
+            try {
+                const payment = {
+                    id: editingPaymentId || Date.now(),
+                    description: document.getElementById('description').value,
+                    person: document.getElementById('person').value,
+                    amount: parseFloat(document.getElementById('amount').value),
+                    dueDate: document.getElementById('dueDate').value,
+                    category: document.getElementById('category').value,
+                    businessName: document.getElementById('businessName').value,
+                    subcategory: document.getElementById('subcategory').value,
+                    type: document.getElementById('type').value,
+                    status: 'pending',
+                    isPartialPayment: document.getElementById('isPartialPayment').checked,
+                    totalAmount: 0,
+                    amountPaid: 0
+                };
+
+                if (payment.isPartialPayment) {
+                    payment.totalAmount = parseFloat(document.getElementById('totalAmount').value) || payment.amount;
+                    payment.amountPaid = parseFloat(document.getElementById('amountPaid').value) || 0;
+
+                    if (payment.amountPaid > payment.totalAmount) {
+                        alert('Amount paid cannot exceed total amount');
+                        return;
+                    }
+                } else {
+                    payment.totalAmount = payment.amount;
+                    payment.amountPaid = 0;
+                }
+
+                if (editingPaymentId) {
+                    const index = data.payments.findIndex(p => p.id === editingPaymentId);
+                    data.payments[index] = payment;
+                    addHistory('Edited', `${payment.description} - $${payment.amount}`);
+                } else {
+                    data.payments.push(payment);
+                    addHistory('Added', `${payment.description} - $${payment.amount}`);
+                }
+
+                saveData();
+                closeModal();
+                renderDashboard();
+                renderPayments();
+                renderCalendar();
+            } catch (error) {
+                console.error('Error saving payment:', error);
+                alert('Error saving payment. Please try again.');
+            }
+        }
+
+        function markAsPaid(id) {
+            const payment = data.payments.find(p => p.id === id);
+            if (!payment) return;
+
+            payment.status = 'paid';
+            if (payment.isPartialPayment) {
+                payment.amountPaid = parseFloat(payment.totalAmount);
+            }
+
+            addHistory('Marked Paid', `${payment.description} - $${payment.amount}`);
+            saveData();
+            renderDashboard();
+            renderPayments();
+            renderCalendar();
+        }
+
+        function deletePayment(id) {
+            if (!confirm('Delete this payment?')) return;
+
+            const payment = data.payments.find(p => p.id === id);
+            if (payment) {
+                addHistory('Deleted', `${payment.description} - $${payment.amount}`);
+                data.payments = data.payments.filter(p => p.id !== id);
+                saveData();
+                renderDashboard();
+                renderPayments();
+                renderCalendar();
+            }
+        }
+
+        // History
+        function renderHistory() {
+            if (data.history.length === 0) {
+                document.getElementById('historyList').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📜</div>
+                        <h3>No history yet</h3>
+                        <p>Your payment activity will appear here</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            data.history.forEach(item => {
+                const date = new Date(item.timestamp);
+                const timeAgo = getTimeAgo(date);
+
+                html += `
+                    <div class="history-item">
+                        <div class="history-header">
+                            <div class="history-action">${item.action}</div>
+                            <div class="history-time">${timeAgo}</div>
+                        </div>
+                        <div class="history-details">${item.details}</div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('historyList').innerHTML = html;
+        }
+
+        function getTimeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+
+            if (seconds < 60) return 'Just now';
+            if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes ago`;
+            if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
+            if (seconds < 604800) return `${Math.floor(seconds / 86400)} days ago`;
+
+            return date.toLocaleDateString();
+        }
+
+        // Initialize on load
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>

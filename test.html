@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 50px;
+            text-align: center;
+        }
+        h1 { color: #667eea; }
+        .box {
+            background: #f0f0f0;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 20px auto;
+            max-width: 500px;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+    </style>
+</head>
+<body>
+    <h1>✅ HTML Files Work!</h1>
+    <div class="box">
+        <p>If you can see this, your browser can open HTML files.</p>
+        <button onclick="alert('JavaScript works too!')">Click Me to Test</button>
+    </div>
+
+    <div class="box">
+        <p><strong>Browser Info:</strong></p>
+        <p id="info"></p>
+    </div>
+
+    <script>
+        document.getElementById('info').innerHTML =
+            'Browser: ' + navigator.userAgent.split(' ').pop() + '<br>' +
+            'Date: ' + new Date().toLocaleDateString();
+    </script>
+</body>
+</html>
